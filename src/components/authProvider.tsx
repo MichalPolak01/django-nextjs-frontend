@@ -1,7 +1,7 @@
 "use client"
 
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect } from "react";
 
 const {createContext, useContext, useState} = require("react");
 const AuthContext = createContext(null);
@@ -12,10 +12,17 @@ const LOGOUT_REDIRECT_URL = "/login";
 const LOGIN_REQUIRED_URL = "/login";
 
 const LOCAL_STORAGE_KEY = "is-logged-in";
+const LOCAL_USERNAME_KEY = "username";
 
 
-export function AuthProvider({children}) {
+interface AuthProviderProps {
+    children: React.ReactNode;
+}
+
+
+export function AuthProvider({children}: AuthProviderProps) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [username, setUsername] = useState("");
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -27,11 +34,24 @@ export function AuthProvider({children}) {
             const storedAutStatusInt = parseInt(storedAutStatus);
             setIsAuthenticated(storedAutStatusInt === 1)
         }
+
+        const storedUsername = localStorage.getItem(LOCAL_USERNAME_KEY);
+        if (storedUsername) {
+            setUsername(storedUsername)
+        }
     }, []);
 
-    const login = () => {
+    const login = (username?: string) => {
         setIsAuthenticated(true);
         localStorage.setItem(LOCAL_STORAGE_KEY, "1");
+
+        if (username) {
+            localStorage.setItem(LOCAL_USERNAME_KEY, `${username}`);
+            setUsername(username);
+        } else {
+            localStorage.removeItem(LOCAL_USERNAME_KEY);
+            setUsername('');
+        }
 
         const nextUrl = searchParams.get("next");
         const inwalidNextUrl = ['/login', '/logout'];
@@ -63,7 +83,7 @@ export function AuthProvider({children}) {
     }
 
     return (
-        <AuthContext.Provider value={{isAuthenticated, login, logout, loginRequired}}>
+        <AuthContext.Provider value={{isAuthenticated, login, logout, loginRequired, username}}>
             {children}
         </AuthContext.Provider>
     );

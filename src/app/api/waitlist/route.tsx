@@ -26,3 +26,39 @@ export async function GET(request: Request) {
 
     return NextResponse.json({...result}, {status: status});
 }
+
+
+export async function POST(request: Request) {
+    const requestData = await request.json();
+    const jsonData = JSON.stringify(requestData);
+    
+    let headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    };
+
+    const authToken = getToken();
+    if (authToken) {
+        headers["Authorization"] = `Bearer ${authToken}`
+    }
+    
+    const requestOptions = {
+        method: "POST",
+        headers: headers,
+        body: jsonData
+    };
+
+    const response = await fetch(DJANGO_API_WAITLIST_URL, requestOptions);
+    try {
+        const responseData = await response.json();
+        console.log(responseData);
+    } catch (error) {
+        return NextResponse.json({message: "Invalid request."}, {status: response.status});
+    }
+
+
+    if (response.ok) {
+        return NextResponse.json({}, {status: 200});
+    }
+    return NextResponse.json({}, {status: 400});
+}

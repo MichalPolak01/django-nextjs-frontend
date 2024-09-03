@@ -38,22 +38,31 @@ export default function Page() {
             body: jsonData
         }
         const response = await fetch(LOGIN_URL, requestOptions);
-        const rData = response.json();
-        console.log(rData);
+
+        interface LoginResponse {
+            username?: string
+        }
+        let data: LoginResponse = {};
+
+        try {
+            data = await response.json();
+        } catch (error) {
+            
+        }
 
         if (response.ok) {
             console.log("logged in");
-            auth.login();
+            auth.login(data?.username);
         }
     }
 
   return (
-    <div className="h-screen flex justify-center items-center">
+    <div className="flex justify-center items-center min-h-[90vh]">
         <Card className="mx-auto max-w-sm">
         <CardHeader>
             <CardTitle className="text-2xl">Login</CardTitle>
             <CardDescription>
-            Enter your username and password below to login to your account
+                Enter your username and password below to login to your account
             </CardDescription>
         </CardHeader>
         <CardContent>

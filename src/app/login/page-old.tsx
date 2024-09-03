@@ -33,7 +33,6 @@ export default function Page() {
             console.log("logged in");
             auth.login();
         }
-
     }
 
 
