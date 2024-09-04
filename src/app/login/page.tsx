@@ -23,7 +23,6 @@ export default function Page() {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log(event, event.target);
 
         const form = event.target as HTMLFormElement
         const formData = new FormData(form);
@@ -51,7 +50,6 @@ export default function Page() {
         }
 
         if (response.ok) {
-            console.log("logged in");
             auth.login(data?.username);
         }
     }

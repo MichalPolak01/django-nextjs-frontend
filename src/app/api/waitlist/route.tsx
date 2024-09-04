@@ -1,26 +1,12 @@
-import { getToken } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import ApiProxy from "../proxy";
 
 const DJANGO_API_WAITLIST_URL = "http://127.0.0.1:8001/api/waitlist/"
 
 
 export async function GET(request: Request) {
-    const authToken = getToken();
+    const response = await ApiProxy.get(DJANGO_API_WAITLIST_URL, true);
 
-    if (!authToken) {
-        return NextResponse.json({}, {status: 401})
-    }
-
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/jsnon",
-            "Authorization": `Bearer ${authToken}`
-        },
-    };
-
-    const response = await fetch(DJANGO_API_WAITLIST_URL, options);
     const result = await response.json();
     let status = response.status
 
@@ -30,32 +16,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     const requestData = await request.json();
-    const jsonData = JSON.stringify(requestData);
-    
-    let headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    };
 
-    const authToken = getToken();
-    if (authToken) {
-        headers["Authorization"] = `Bearer ${authToken}`
-    }
-    
-    const requestOptions = {
-        method: "POST",
-        headers: headers,
-        body: jsonData
-    };
+    const response = await ApiProxy.post(DJANGO_API_WAITLIST_URL, requestData, true);
 
-    const response = await fetch(DJANGO_API_WAITLIST_URL, requestOptions);
     try {
-        const responseData = await response.json();
-        console.log(responseData);
+        await response.json();
     } catch (error) {
         return NextResponse.json({message: "Invalid request."}, {status: response.status});
     }
-
 
     if (response.ok) {
         return NextResponse.json({}, {status: 200});
